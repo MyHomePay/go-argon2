@@ -2,8 +2,8 @@ package argon2_test
 
 import (
 	"fmt"
-	"github.com/tvdburgt/go-argon2"
 	"log"
+	"github.com/MyHomePay/go.argon2"
 )
 
 func ExampleHash() {
