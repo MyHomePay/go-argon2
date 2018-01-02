@@ -37,7 +37,7 @@ func NewContext(mode ...int) *Context {
 }
 
 // hash password and salt
-func (ctx *Context) hash(password []byte, salt []byte) ([]byte, error) {
+func (c *Context) hash(password []byte, salt []byte) ([]byte, error) {
 
 	if len(password) == 0 {
 		return nil, ErrPassword
@@ -46,41 +46,41 @@ func (ctx *Context) hash(password []byte, salt []byte) ([]byte, error) {
 		return nil, ErrSalt
 	}
 
-	hash := make([]byte, ctx.HashLen)
+	hash := make([]byte, c.HashLen)
 
 	// optional secret
 	secret := (*C.uint8_t)(nil)
-	if len(ctx.Secret) > 0 {
-		secret = (*C.uint8_t)(&ctx.Secret[0])
+	if len(c.Secret) > 0 {
+		secret = (*C.uint8_t)(&c.Secret[0])
 	}
 
 	// optional associated data
 	associatedData := (*C.uint8_t)(nil)
-	if len(ctx.AssociatedData) > 0 {
-		associatedData = (*C.uint8_t)(&ctx.AssociatedData[0])
+	if len(c.AssociatedData) > 0 {
+		associatedData = (*C.uint8_t)(&c.AssociatedData[0])
 	}
 
 	// optional flags
 	flags := FlagDefault
-	if ctx.Flags != 0 {
-		flags = ctx.Flags
+	if c.Flags != 0 {
+		flags = c.Flags
 	}
 
 	// wrapper to overcome go pointer passing limitations
 	result := C.argon2_wrapper(
-		(*C.uint8_t)(&hash[0]), C.uint32_t(ctx.HashLen),
+		(*C.uint8_t)(&hash[0]), C.uint32_t(c.HashLen),
 		(*C.uint8_t)(&password[0]), C.uint32_t(len(password)),
 		(*C.uint8_t)(&salt[0]), C.uint32_t(len(salt)),
-		secret, C.uint32_t(len(ctx.Secret)),
-		associatedData, C.uint32_t(len(ctx.AssociatedData)),
-		C.uint32_t(ctx.Iterations),
-		C.uint32_t(ctx.Memory),
-		C.uint32_t(ctx.Parallelism),
-		C.uint32_t(ctx.Parallelism),
-		C.uint32_t(ctx.Version),
+		secret, C.uint32_t(len(c.Secret)),
+		associatedData, C.uint32_t(len(c.AssociatedData)),
+		C.uint32_t(c.Iterations),
+		C.uint32_t(c.Memory),
+		C.uint32_t(c.Parallelism),
+		C.uint32_t(c.Parallelism),
+		C.uint32_t(c.Version),
 		nil, nil,
 		C.uint32_t(flags),
-		C.argon2_type(ctx.Mode))
+		C.argon2_type(c.Mode))
 
 	if result != C.ARGON2_OK {
 		return nil, Error(result)
